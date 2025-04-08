@@ -47,6 +47,16 @@ pip install matplotlib
 <img src='./images/가상환경에matplotlib설치.png'>
 <img src='./images/가상환경에matplotlib설치확인.png'>
 
+- matplotlib 한글깨짐 방지 위한 코드- 주피터노트북할 때마다 제일먼저 실행
+```python
+from matplotlib import rcParams, font_manager, rc
+
+font_path = 'C:/Windows/Fonts/malgun.ttf' # 나눔고딕코딩 사용, 나눔고딕에서 오류발생(!)
+font = font_manager.FontProperties(fname=font_path).get_name() # 실제 설치된 폰트 이름조회
+rc('font', family=font) # 한글깨짐현상 해결!!
+rcParams['axes.unicode_minus'] = False # 한글 사용시 마이너스 표시 깨짐 해결!
+```
+
 - 사이킷런 설치
 ```shell
 pip install scikit-learn
@@ -59,5 +69,10 @@ pip install scikit-learn
 pip install tensorflow==2.15.0
 
 ```
-## 
+#### 첫번째 머신러닝
+- 캐글 생선 데이터
+    - https://www.kaggle.com/datasets/vipullrathod/fish-market
+- 길이를 보고 도미(beam)인지 빙어(smelt)인지 판별
+- 이진분류
+- ctrl shift p 눌러서 주피터노트북 만들기, 주피터 노트북 저장 
 
