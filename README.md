@@ -40,6 +40,10 @@
 - .gitignore에 /mlenv 추가 후 .gitignore만 깃허브 우선 commit push
     - 사용자가 만든 가상환경의 경우, 가상환경은 깃허브에 올라가지 않도록 처리
 
+
+https://github.com/user-attachments/assets/205c08f0-3ec6-47ee-9422-d52533350b81
+
+
 - matplotlib 설치
 ```shell
 pip install matplotlib
