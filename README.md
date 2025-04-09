@@ -115,6 +115,10 @@ pip install tensorflow==2.15.0
 
 
 ## 47일차(4월 9일 수요일)
+### 빅데이터에 필요한 모듈 [노트북](./day47/mldl01_주요모듈학습.ipynb)
+- Matplotlib(차트), Numpy(배열), Pandas(데이터 조작), Seaborn(차트 꾸미기), Folium(지도)
+- Faker(더미데이터 생성)
+
 ### 데이터 전처리
 ### 선형회귀
 ### 로지스틱회귀
