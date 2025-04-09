@@ -1,0 +1,54 @@
+0)주피터노트북 생성 및 저장 ctrl shift p
+
+1)한글깨짐, matplot, seaborn
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+from matplotlib import rcParams, font_manager, rc
+
+font_path = 'C:/Windows/Fonts/malgun.ttf' 
+font = font_manager.FontProperties(fname=font_path).get_name() 
+rc('font', family=font)
+rcParams['axes.unicode_minus'] = False 
+
+sns.set_style('darkgrid')
+sns.set_theme(font='Malgun Gothic', rc={'axes.unicode_minus':False}) 
+
+
+2)사이킷런 훈련세트, 테스트세트
+from sklearn.model_selection import train_test_split
+train_input, test_input, train_target, test_target  = train_test_split(
+
+    fish_data, fish_target, random_state= 42 , test_size=0.3 , stratify=fish_target
+)
+
+
+3)표준 스케일링
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+
+train_input2 = scaler.fit_transform(train_input)
+test_input2 = scaler.fit_transform(test_input)
+
+4)k-최근접 분류-입력이 [길이, 무게] 쌍일 때 물고기 종류 분류
+from sklearn.neighbors import KNeighborsClassifier
+kn = KNeighborsClassifier()
+kn.fit(train_input, train_target)  #학습
+kn.score(test_input, test_target)#테스트
+kn.predict([[50,100]])		#예측
+
+5)k-최근접 회귀-입력이 [길이]일 때 물고기 무게 예측
+from sklearn.neighbors import KNeighborsRegressor
+knr = KNeighborsRegressor()
+knr.fit(train_input, train_target)  #학습
+knr.score(test_input, test_target)#테스트
+knr.predict([[50,]])		#예측
+
+6)선형회귀-입력이 [길이]일 때 물고기 무게 예측
+from sklearn.linear_model import LinearRegression
+lr = LinearRegression()
+lr.fit(train_input, train_target)  #학습
+lr.score(test_input, test_target)#테스트
+lr.predict([[50,]])			#예측
+

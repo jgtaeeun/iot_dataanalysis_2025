@@ -116,12 +116,98 @@ pip install tensorflow==2.15.0
 
 ## 47일차(4월 9일 수요일)
 ### 빅데이터에 필요한 모듈 [노트북](./day47/mldl01_주요모듈학습.ipynb)
-- Matplotlib(차트), Numpy(배열), Pandas(데이터 조작), Seaborn(차트 꾸미기), Folium(지도)
+- Matplotlib(차트), Numpy(배열), Pandas(데이터 조작), Seaborn(차트 꾸미기)
+- Folium(지도)
 - Faker(더미데이터 생성)
 
-### 데이터 전처리
-### 선형회귀
+### 데이터 전처리  [노트북](./day47/mldl02_데이터전처리.ipynb)
+- 머신러닝/딥러닝 이전에 데이터 가공
+- 넘파이 배열
+```python
+fish_data = np.column_stack((fish_length, fish_weight))
+```
+- 사이킷런 훈련세트, 테스트세트
+```python
+from sklearn.model_selection import train_test_split
+train_input, test_input, train_target, test_target  = train_test_split(
+
+    fish_data, fish_target, random_state= 42 , test_size=0.3 , stratify=fish_target
+)
+```
+- 표준점수 스케일링
+```python
+#axis=0은 **열 방향 (세로 방향)**을 의미합니다. 즉, 각 열에 대해 평균을 구하는 것입니다.
+
+mean =np.mean(train_input, axis=0)           
+std = np.std(train_input, axis = 0)
+
+train_scaled = (train_input - mean) / std
+test_scaled = (test_input - mean)/std
+scaled_data =([25,150] - mean)/std
+
+
+distances, indexes = kn.kneighbors([scaled_data])
+
+plt.scatter(train_scaled[:,0], train_scaled[:,1], label='훈련세트')
+plt.scatter(scaled_data[0] , scaled_data[1], marker='^', label='예측데이터')
+plt.scatter(train_scaled[indexes,0] , train_scaled[indexes, 1], marker='D', label='최근접데이터')
+plt.scatter(test_scaled[:,0], test_scaled[:,1], label='테스트세트')
+plt.xlabel('도미/빙어 길이(표준화)')
+plt.ylabel('도미/빙어 무게(표준화)')
+plt.legend() # 범례 표시
+plt.show()
+
+```
+- 표준스케일러 모듈 사용
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+train_input2 = scaler.fit_transform(train_input)
+test_input2 = scaler.fit_transform(test_input)
+
+
+kn2 = KNeighborsClassifier()
+kn.fit(train_input2, train_target)
+kn.score(test_input2, test_target)
+
+kn.predict([scaled_data])
+```
+### 선형회귀  [노트북](./day47/mldl03_선형회귀.ipynb)
+- 회귀 : 두 변수 사이의 상관관계를 분석하는 방법
+    - 임의의 수치를 예측하는 문제
+- 과대적합 - overfit , 모델 훈련세트 성능이 테스트세트 성능보다 훨씬 높을 때
+- 과소적합 - underfit , 훈련세트 성능 낮거나, 테스트세트 성능이 너무 높을 때
+<img src='./day47/선형회귀.png'>
+
+- K-최근접 알고리즘의 문제점
+    - 최근접 데이터 3개의 무게의 평균값이 1033.33333이 길이 50cm인 농어의 예측무게 1033.3333이다.
+    - 길이 80cm인 농어의 예측값 또한 1033.3333이다. 최근접 데이터 3개가 동일하므로 
+    ```python
+    from sklearn.neighbors import KNeighborsRegressor
+    knr = KNeighborsRegressor(n_neighbors=3)
+    knr.fit(train_input, train_target)
+    knr.score(test_input , test_target)
+    
+    knr.predict([[50,]])  # array([1033.33333333])
+    knr.predict([[80,]])    # array([1033.33333333])
+    ```
+- 선형회귀의 문제점
+    - 길이를 넣었을 때, 물고기 무게의 예측값이 음수가 나온다.
+    ```python
+    from sklearn.linear_model import LinearRegression
+    lr = LinearRegression()
+    lr.fit(train_input, train_target)
+    lr.score(test_input, test_target)
+    print(lr.coef_, lr.intercept_)  # [39.01714496] -709.0186449535474
+
+
+    lr.predict([[50,]])  #array([1241.83860323])
+    lr.predict([[10,]])  # array([-318.84719532])
+    ```
 ### 로지스틱회귀
+
 ### 확률적 경사하강법
 ### 인공신경망
 ### 심층신경망
