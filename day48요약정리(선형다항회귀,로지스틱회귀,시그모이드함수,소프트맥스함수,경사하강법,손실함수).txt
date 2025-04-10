@@ -1,0 +1,53 @@
+1. 선형단항회귀 문제점
+음수값이  예측됨
+
+2. 선형다항회귀
+train_poly = np.column_stack((train_input ** 2 , train_input))
+lr2 =LinearRegression()
+lr2.fit(train_poly, train_target)
+lr2.predict([[50**2,50]])
+
+3. 로지스틱회귀
+선형다항회귀
+lr = LogisticRegression()
+lr.fit(train_scaled_Bream, train_scaled_target)
+
+lr.predict(test_scaled_Bream[:5])
+decisions = lr.decision_function(test_scaled_Bream[:5])
+
+시그모이드함수(이진분류)
+from scipy.special import expit
+probaSig = expit(decisons)
+np.round(probaSig, decimals = 3)
+
+소프트맥스함수(다중분류)
+from scipy.special import softmax
+probaSoft =softmax(decisions)
+np.round(probaSoft , decimals = 3)
+
+4. 확률적 경사하강법 
+훈련세트에서 샘플 하나씩 꺼내 손실함수 경사에 따라 최적의 모델을 찾는 알고리즘
+
+5. 손실함수
+확률적 경사하강법이 최적화할 대상
+
+6. 에포크
+전체 샘플을 모두 사용하여 훈련한 반복횟수  
+반복을 많이 한다고 해서 결과가 좋아지는 것은 아님
+loss, tol, early_stopping 등 하이퍼파라미터를 적절히 변경해야 함 
+
+
+7. SGD실습
+from sklearn.linear_model import SGDClassifier
+sc1 = SGDClassifier(loss='log_loss', max_iter=10 , random_state=42) -> 반복횟수 부족
+sc1.score(train_scaled, train_target) 0.773109243697479
+
+
+sc2 = SGDClassifier(loss='log_loss', max_iter=100 , random_state=42) -> 반복횟수 늘렸으나 100이던 1000이던 40이던 정확도 동일
+sc2.score(train_scaled, train_target) 0.8739495798319328
+
+sc3 = SGDClassifier(loss='log_loss' , max_iter=300 ,random_state=42 , early_stopping=True, tol=1e-3)  -> 조기종료
+sc3.score(train_scaled, train_target) 0.8739495798319328
+
+sc4 = SGDClassifier(loss='hinge', max_iter=100, random_state=42, tol=None)  ->SGDClassifier()함수의 기본 손실함수 hinge 손실함수
+sc4.score(train_scaled, train_target) 0.9495798319327731
