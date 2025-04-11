@@ -1,0 +1,200 @@
+0) 
+import numpy as np
+import matplot.pyplot as plt
+import seaborn as sns
+
+한글깨짐 방지 코드
+
+# 훈련세트 , 테스트 세트 분리
+from sklearn.model_selection import train_test_split 
+# 스케일링
+from sklearn.preprocessing import StandaradScaler
+#로지스틱 회귀
+from sklearn.linear_model import LogisticRegression
+
+1) 교차검증
+원본데이터를 8:2 또는 7:3으로 훈련세트와 테스트세트로 분리
+검증세트를 떼어내어 검증(평가)하는 과정을 여러번 반복하는 것
+
+
+2) 검증세트
+모델을 훈련할 때는 훈련 세트만 사용하고,
+모델이 잘 학습됐는지 확인하기 위해 검증 세트를 사용
+
+
+3)그리드서치
+하이퍼파라미터를 편리하게 관리해주는 도구
+
+4)Fashion MNIST 실습
+import tensorflow as tf
+from tensorflow import keras
+
+#데이터 셋
+[train_input, train_target] ,[test_input , test_target] =keras.datasets.fashion_mnist.load_data()
+
+
+4-1) 사이킷런 머신러닝 , 로지스틱회귀 
+#2차원을 1차원으로 이미지 변경
+train_input.reshape(-1, 28*28)
+test_input.reshape(-1, 28*28)
+
+#스케일링
+sc = StandardScaler()
+train_scaled = sc.fit_transform(train_input.astype(np.float64)
+test_scaled = sc.transform(test_input.astype(np.float64)
+
+#로지스틱회귀
+lr = LogisticRegression(C=20 , max_iter = 1000)
+lr.fit(train_scaled, train_target)
+
+4-2) 딥러닝-인공신경망 + 검증세트 추가
+#검증세트
+train_scaled, val_scaled, train_target, val_target = train_test_split (
+	train_scaled, train_target, random_state = 42 , test_size = 0.2
+)
+
+#밀집층
+dense = keras.layers.Dense ( 10, activation = 'softmax' , input_shape =(784,))
+
+#모델 준비
+model = keras.Sequential(dense)
+model.compile(loss='sparse_categorical_crossentropy', metrics='accuracy')
+
+# 훈련 및 검증세트 확인
+model.fit(train_scaled,train_target,epochs=10)
+model.evaluate(val_scaled, val_target)
+
+4-3) 딥러닝-심층신경망
+4-3-1)시그모이드
+#밀집층
+dense = keras.layers.Dense(100, activation = 'sigmoid' , input_shape(784,))
+dense2 = keras.layers.Dense(10, activation = 'softmax' , input_shape(100,))
+
+#모델 준비
+model2 = keras.Sequential([dense, dense2])
+model2.summary()
+model2.compile(loss='sparse_categorical_crossentropy', metrics='accuracy')
+
+# 훈련 및 검증세트 확인
+model2.fit(train_scaled,train_target,epochs=10)
+model2.evaluate(val_scaled, val_target)
+
+
+4-3-2)렐루 & Flatten
+`렐루함수` : 시그모이드 함수의 단점을 보완한 활성화 함수
+
+# 스케일링
+# 이미지 데이터는 보통 픽셀 값이 0~255 사이의 정수로 되어 있음.
+#255.0으로 나누면 모든 값이 0~1 사이의 실수 값으로 바뀜.
+train_scaled = train_input / 255.0
+test_scaled = test_input / 255.0
+
+# 검증세트
+train_scaled, val_scaled, train_target, val_target = train_test_split(
+    train_scaled, train_target, random_state=42 , test_size=0.2
+)
+
+#밀집층 + 모델 준비
+model2 = keras.Sequential(
+
+	keras.layers.Flatten(input_shape=(28,28) ) ,
+	keras.layers.Dense(100, activation = 'relu'),
+	keras.layers.Dense(10, activation = 'softmax')
+)
+
+model2.compile(loss='sparse_categorical_crossentropy', metrics='accuracy')
+
+# 훈련 및 검증세트 확인
+model2.fit(train_scaled,train_target,epochs=10)
+model2.evaluate(val_scaled, val_target)
+
+4-3-3) 옵티마이저 추가
+model3 = keras.Sequential(
+
+	keras.layers.Flatten(input_shape=(28,28) ) ,
+	keras.layers.Dense(100, activation = 'relu'),
+	keras.layers.Dense(10, activation = 'softmax')
+)
+
+model3.compile(loss='sparse_categorical_crossentropy', metrics='accuracy', optimizer='adam')
+
+# 훈련 및 검증세트 확인
+model3.fit(train_scaled,train_target,epochs=10)
+model3.evaluate(val_scaled, val_target)
+
+
+4-3-4)드롭아웃
+학습 중에 무작위로 일부 뉴런을 꺼버리는 기법
+뉴런들을 랜덤하게 사용하지 않도록 해서, 네트워크가 너무 특정한 패턴에만 의존하지 않도록 만들어
+
+model4 = keras.Sequential([
+    keras.layers.Flatten(input_shape=(28,28), name= 'Flatten'),
+    keras.layers.Dense(100, activation='relu',  name = 'hidden' ),
+    keras.layers.Dropout(0.3),
+    keras.layers.Dense(10, activation='softmax',  name = 'output' ),
+] , name = 'Fashio_MNIST_ReLu'
+)
+
+model4.compile(loss='sparse_categorical_crossentropy', metrics='accuracy', optimizer='adam')
+
+# 훈련 및 검증세트 확인
+model4.fit(train_scaled,train_target,epochs=10)
+model4.evaluate(val_scaled, val_target)
+
+5) 모델 저장과 복원
+딥러닝에서 모델 저장할 때 .h5 확장자를 사용하는 이유는 이 파일 포맷이 **HDF5 (Hierarchical Data Format version 5)**라는 데이터 포맷을 기반으로 하기 때문이에요.
+
+5-1) 파라미터만
+#저장
+model4.save_weights('./model4-weight.h5')
+
+#복원 - 먼저 모델 생성 후 파라미터만 지정한 파일 사용해야함
+model5 = keras.Sequential([
+    keras.layers.Flatten(input_shape = (28,28)),
+    keras.layers.Dense(100, activation='relu'),
+    keras.layers.Dropout(0.3),
+    keras.layers.Dense(10, activation='softmax')
+])
+
+model5.load_weights('./model4-weight.h5')
+
+pred_result = model5.predict(test_scaled)
+
+5-2)모델 전체
+#저장
+model4.save('./model4-whole.h5')
+
+#복원
+model6 = keras.models.load_model('./model4-whole.h5')
+model6.evaluate(val_scaled, val_target)
+
+6) 콜백
+model7 = keras.Sequential([
+    keras.layers.Flatten(input_shape=(28,28), name= 'Flatten'),
+    keras.layers.Dense(100, activation='relu',  name = 'hidden' ),
+    keras.layers.Dropout(0.3),
+    keras.layers.Dense(10, activation='softmax',  name = 'output' ),
+] , name = 'Fashio_MNIST_ReLu'
+)
+
+model7.compile(loss='sparse_categorical_crossentropy', metrics='accuracy', optimizer='adam')
+
+# 에포크마다 모델 저장 기능
+checkpoint_cb = keras.callbacks.ModelCheckpoint('./best-model.h5', save_best_only=True)    #최고 상태일 때 저장
+
+# 조기종료
+# 두번이상 훈련값이 동일하면 조기종료, 이전 최고상태로 복구
+early_stop_cb = keras.callbacks.EarlyStopping(patience=2)       
+
+
+model7.fit(train_scaled,train_target,epochs=20, validation_data=(val_scaled, val_target),
+           callbacks=[checkpoint_cb, early_stop_cb])
+
+
+early_stop_cb.stopped_epoch
+
+
+- patience=2이고, 에포크 6에서 최고 성능이었다면,
+- 에포크 7,8에서 개선이 없으면,
+- 에포크 8이 끝난 직후, “이제 멈춰야겠다”라고 결정합니다.
+- 그래서 8까지 출력은 되지만, stopped_epoch=7가 되는 거예요.
