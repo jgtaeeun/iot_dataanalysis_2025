@@ -1,0 +1,95 @@
+keras   -Fashion MNIST 학습
+
+
+                                                          														   
+1)데이터 준비 
+import tensorflow as tf
+from tensorflow import keras
+		
+(train_input, train_target) , (test_input, test_target)  = keras.datasets.fashion_mnist.load_data()
+		
+#스케일링, 훈련,검증세트 분리
+from sklearn.model_selection import train_test_split
+
+train_scaled= train_input.reshape(-1, 28, 28, 1)  / 255.0
+test_scaled= test_input.reshape(-1, 28, 28, 1)  / 255.0	
+
+train_scaled, val_scaled, train_target, val_target = train_test_split(
+	train_scaled, train_target, test_size =0.2, random_state=42
+)
+
+2)합성곱신경망 
+model = keras.Sequential(name='CNN1')
+model.add(keras.layers.Conv2D(filters=32, kernel_size = 3 , activation = 'relu', padding = 'same' , input_shape=(28,28,1), name='Fisrt_CNN'))
+model.add(keras.layers.MaxPooling2D(2, name='Fisrt_Pooling')) 
+model.add(keras.layers.Conv2D(64, kernel_size = 3 , activation='relu', padding='same', name='Second_CNN'))
+model.add(keras.layers.MaxPooling2D(2, name='Second_Pooling'))
+
+심층신경망	
+model.add(keras.layers.Flatten())
+model.add(keras.layers.Dense(100, activation='relu'))
+model.add(keras.layers.Dropout(0.4))
+model.add(keras.layers.Dense(10, activation='softmax'))
+
+
+3)훈련
+model.compile(loss= 'sparse_categorical_crossentropy', metrics='accuracy', optimizer='adam')
+checkpoint_cb = keras.callbacks.ModelCheckpoint('best-cnn-model.h5', save_best_only=True)
+early_stopping_cb = keras.callbacks.EarlyStopping(patience=2, restore_best_weights=True)
+
+histroy = model.fit(train_scaled,train_target, epochs= 50, validation_data=(val_scaled, val_target), callbacks=[checkpoint_cb, early_stopping_cb])
+
+
+# 모델 검증정확도
+model.evaluate(val_scaled, val_target)
+
+4-1)예측
+model.predict(val_scaled[0:1]).round(2)
+
+# 가방이 인덱스 8인데 예측결과 8번째인덱스 값이 1이다. 예측정확!
+array([[0., 0., 0., 0., 0., 0., 0., 0., 1., 0.]], dtype=float32)
+
+4-2)예측시각화
+
+pred_result = model.predict(test_scaled).round(2)
+
+def show_image(index):
+    plt.figure(figsize=(2,2))
+    plt.imshow(test_scaled[index].reshape(28, 28), cmap='gray_r')
+    true_label = class_names[test_target[index]]
+    pred_label = class_names[np.argmax(pred_result[index])]
+
+
+    plt.text(0, -6, f'실제: {true_label}', fontsize=12, color='blue')
+    plt.text(0, -3, f'예측: {pred_label}', fontsize=12, color='red', fontweight='bold')
+
+    plt.axis('off')
+    plt.show()
+
+
+5) 모델 저장과 복원
+딥러닝에서 모델 저장할 때 .h5 확장자를 사용하는 이유는 이 파일 포맷이 **HDF5 (Hierarchical Data Format version 5)**라는 데이터 포맷을 기반으로 하기 때문이에요.
+
+5-1) 파라미터만
+#저장
+model4.save_weights('./model4-weight.h5')
+
+#복원 - 먼저 모델 생성 후 파라미터만 지정한 파일 사용해야함
+model5 = keras.Sequential([
+    keras.layers.Flatten(input_shape = (28,28)),
+    keras.layers.Dense(100, activation='relu'),
+    keras.layers.Dropout(0.3),
+    keras.layers.Dense(10, activation='softmax')
+])
+
+model5.load_weights('./model4-weight.h5')
+
+pred_result = model5.predict(test_scaled)
+
+5-2)모델 전체
+#저장
+model4.save('./model4-whole.h5')
+
+#복원
+model6 = keras.models.load_model('./model4-whole.h5')
+model6.evaluate(val_scaled, val_target)

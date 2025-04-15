@@ -1,0 +1,150 @@
+pytorch   -Fashion MNIST 학습
+
+                                                          														   
+1)데이터 준비 
+
+import torch
+from torchvision import datasets, transforms
+from torch.utils.data import Dataset, DataLoader
+
+#Pytorch는 현재위치에 다운로드(C:\Source\iot_dataanalysis_2025\day51) 
+#다운로드 받은 데이터는 gitignore에 적어야함. 깃허브에 올리지 않도록
+train_dataset = datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform)
+val_dataset = datasets.FashionMNIST(root='./data', train=False, transform= transform)
+test_dataset = datasets.FashionMNIST(root='./data', train=False, transform= transform)
+
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=64)
+test_loader= DataLoade(test_dataset , batch_size=16)
+
+
+2)합성곱신경망 + 심층신경망
+import torch.nn as nn                       
+import torch.nn.functional as F           
+
+class CNN(nn.Module) :
+    def __init__(self):
+        super(CNN, self).__init__()
+
+        self.conv1= nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding=1)
+
+        self.pool = nn.MaxPool2d(2,2)
+
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)
+
+        self.fc1 = nn.Linear(64*7*7,128)
+        self.fc2 = nn.Linear(128,10)
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))      #→ 28x28 → 14x14
+        x = self.pool(F.relu(self.conv2(x)))      # → 14x14 → 7x7
+        
+        x = x.view(-1,64*7*7)
+
+        x = F.relu(self.fc1(x))
+
+        x = F.softmax(self.fc2(x))
+
+        return x
+
+
+3)훈련 /평가함수 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model = CNN().to(device)
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
+
+
+#훈련함수
+def train(model, dataloader, criterion, optimizer) :
+    model.train()   # 훈련모드
+    total_loss = 0
+    
+    for X_batch, y_batch in dataloader :
+        X_batch, y_batch = X_batch.to(device) , y_batch.to(device)
+
+        optimizer.zero_grad()
+        outputs = model(X_batch)
+            
+        loss = criterion(outputs, y_batch)
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+    avg_loss = total_loss / len(dataloader)
+    return avg_loss
+
+
+#평가함수
+def evaluate (model, dataloader, criterion) :
+    model.eval()    #평가모드
+    total_loss =0
+    correct = 0
+    total =0
+
+    with torch.no_grad() : #평가시에는 그레디언트 꺼줌
+        for X_batch, y_batch in dataloader:
+             X_batch, y_batch = X_batch.to(device) , y_batch.to(device)
+             outputs = model(X_batch)
+             loss = criterion(outputs, y_batch)
+             total_loss += loss.item()
+
+             preds =torch.argmax(outputs, dim=1) 
+
+             correct += (preds == y_batch).sum().item()
+
+             total += y_batch.size(0)
+
+        avg_loss = total_loss / len(dataloader)
+        accuracy = correct / total
+        return avg_loss, accuracy
+
+
+
+#실행
+EPOCH = 10
+for epoch in range(EPOCH):
+    train_loss = train(model, train_loader, criterion, optimizer)
+    val_loss , val_acc = evaluate(model, val_loader, criterion)
+
+    print(f'[{epoch+1}/{EPOCH}] Train Loss : {train_loss:.3f} | Val Loss : {val_loss:.3f} | Val Accuaracy :{val_acc:.2%}')
+
+4)예측
+
+# 테스트 배치 하나만 가져오기
+images, labels = next(iter(test_loader))
+images = images.to(device)
+labels = labels.to(device)
+
+#모델을 검증모드
+model.eval()
+with torch.no_grad():
+    outputs = model(images)
+    preds = torch.argmax(outputs, dim=1)
+
+#예측값 시각화. 시각화 때는 cuda를 못 씀
+plt.figure(figsize=(9,9))
+for i in range(16):
+    plt.subplot(4,4,i+1)
+    plt.imshow(images[i].cpu().squeeze(), cmap='gray_r')
+    plt.axis('off')
+    plt.title(f'예측:{class_names[preds[i]]}\n실제:{class_names[labels[i]]}', color = 'green' if preds[i]==labels[i] else  'red')
+
+plt.tight_layout()
+plt.show()
+
+5)모델 저장과 복원(pytorch는 모델저장 확장자는 .pth)
+
+5-1)가중치만
+torch.save(model.state_dict(), './fashion_mnist_cnn.pth') 
+
+# 가중치 저장만 저장한 모델을 쓰려면 모델을 직접 생성해야 함
+model2 = CNN().to(device)
+model2.load_state_dict(torch.load('./fashion_mnist_cnn.pth', map_location=device))
+model2
+
+5-2)전체모델
+torch.save(model, './fashion_mnist_full.pth')
+model3 = torch.load('./fashion_mnist_full.pth' , weights_only=False)
+model3
