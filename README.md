@@ -410,9 +410,17 @@ kn.predict([scaled_data])
 - 파이토치로 패션mnist 실습
 - keras CNN과 비교해서 학습할 것!
 
+## 52일차(4/16 수요일)
 ### 토이프로젝트
+- cats and dogs 이진분류 실습 + 캐글에서 코딩하는 법 [노트북](./day52/mldl01_catsdogs.ipynb)
+    - 훈련세트로 예측한 결과 
+        - <img src = './day52/train_loader예측.png' width =500>
+    - 테스트세트로 예측한 결과
+        - <img src = './day52/test_loader예측.png' width =500>
+- 캐글 참조 노트북 [노트북](./day52/mldl03_Cats_vs_Dogs_Kaggle.ipynb)
 
 
+## 53일차(4/17 목요일)
 ### 순차데이터와 순환신경망
 
 
