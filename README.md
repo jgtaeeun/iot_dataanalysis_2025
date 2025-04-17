@@ -430,7 +430,8 @@ kn.predict([scaled_data])
 - 2020년 파이토치 기반 변경 : https://www.ultralytics.com/ko
 - 이미지 객체인식
 - 영상 객체인식
-### 순차데이터와 순환신경망
+### 코딩테스트 [노트북](./day53/250417_코딩테스트.ipynb)
+- MNIST 숫자 데이터를 Pytorch CNN으로 학습하여 0~9 숫자 예측
 
 
 
