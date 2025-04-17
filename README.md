@@ -421,6 +421,15 @@ kn.predict([scaled_data])
 
 
 ## 53일차(4/17 목요일)
+### YOLO [노트북](./day53/mldl01_YOLO_기초.ipynb)
+- YOLO(You Only Look Once) - 객체 탐지, 이미지 분할 등을 위한 딥러닝 모델
+    - 2015년 배포
+    - 이미지를 영역 나눠, 각 영역에 대한 경제 상자와 확률을 예측
+    - 스마트 CCTV : 자동차 사고, 화재경보 등 사고 즉시 파악 예보
+- 최초 공식사이트 : https://pjreddie.com/darknet/yolo/
+- 2020년 파이토치 기반 변경 : https://www.ultralytics.com/ko
+- 이미지 객체인식
+- 영상 객체인식
 ### 순차데이터와 순환신경망
 
 
